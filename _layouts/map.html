@@ -8,48 +8,38 @@ layout: null
 
 </head>
 <body>
+<div id="map" style="width:100%; height:600px; background-color:#e0e0e0; position:relative; z-index:0;"></div>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div id="map" style="width: 100%; height: 600px; background: #eee;"></div>
-
 <script>
-    // 2. DOM이 완전히 로드된 후 지도 실행
-    document.addEventListener("DOMContentLoaded", function() {
+    // 페이지가 완전히 로드된 후 지도를 그립니다.
+    window.onload = function() {
+        console.log("지도 로딩 시작...");
+        
         var map = L.map('map').setView([35.15, 128.60], 12);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 3. 데이터 로드 (경로를 절대경로인 /assets/로 강제 지정)
-        fetch('/assets/places.json')
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                data.forEach(function(item) {
+        // 데이터 로드 확인용 로그
+        fetch('{{ site.baseurl }}/assets/places.json')
+            .then(res => res.json())
+            .then(data => {
+                console.log("데이터 개수:", data.length);
+                data.forEach(item => {
                     var lat = parseFloat(item.lat);
                     var lng = parseFloat(item.lng);
-                    
                     if(!isNaN(lat) && !isNaN(lng)) {
-                        // 날짜 및 팝업 구성
-                        var dateStr = String(item.img).substring(0, 8);
-                        var dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6);
-                        var title = item.place || item.address;
-
-                        var marker = L.marker([lat, lng]).addTo(map);
-                        marker.bindPopup(
-                            '<div style="text-align:center; min-width:200px;">' +
-                            '<div style="font-size:12px; color:#666;">' + dateDisplay + '</div>' +
-                            '<div style="font-weight:bold; font-size:16px;">' + title + '</div>' +
-                            '<img src="/assets/map_img/' + item.img + '" style="width:200px; margin:10px 0; border-radius:4px;" onerror="this.style.display=\'none\'">' +
-                            '<div style="font-size:12px;">' + item.address + '</div>' +
-                            '</div>'
-                        );
+                        L.marker([lat, lng]).addTo(map).bindPopup("<b>" + (item.place || "위치") + "</b>");
                     }
                 });
             })
-            .catch(function(err) { console.error("데이터 로드 에러:", err); });
-    });
+            .catch(err => console.error("데이터 오류:", err));
+    };
 </script>
 
 </body>
