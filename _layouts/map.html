@@ -56,7 +56,7 @@ layout: null
                     if(!isNaN(lat) && !isNaN(lng)) {
                         // 날짜 및 팝업 구성
                         var dateStr = String(item.img).substring(0, 8);
-                        var dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6);
+                        var dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6) + ".";
                         var title = item.place || item.address;
 
 var marker = L.marker([lat, lng]).addTo(map);
