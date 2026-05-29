@@ -54,7 +54,9 @@ exclude:
 - LICENSE.md
 
 exclude: [vendor]
-
+include:
+ - _data
+ 
 Blog: /blog
 Life: /life
 
