@@ -36,26 +36,7 @@ layout: null
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 4. 데이터 로드 후 핀 꽂기 (이미지/핀 문제 해결을 위해 CDN 주소 직접 지정)
-        fetch('{{ site.baseurl }}/assets/places.json')
-            .then(res => res.json())
-            .then(data => {
-                data.forEach(item => {
-                    var lat = parseFloat(item.lat);
-                    var lng = parseFloat(item.lng);
-                    
-                    if(!isNaN(lat) && !isNaN(lng)) {
-                        L.marker([lat, lng]).addTo(map)
-                         .bindPopup(`
-                            <div style="text-align:center;">
-                                <b>${item.place}</b><br>
-                                <img src="{{ site.baseurl }}/assets/images/${item.img}" style="width:150px; margin-top:5px;">
-                            </div>
-                         `);
-                    }
-                });
-            })
-            .catch(err => console.error("데이터 로드 중 에러:", err));
+  
         
         // 5. 지도 크기 강제 재계산 (회색 화면 방지)
         setTimeout(() => { map.invalidateSize(); }, 500);
