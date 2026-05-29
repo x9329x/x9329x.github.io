@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaflet CSV 지도 마커</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        /* 지도가 표시될 크기 설정 */
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+        /* 팝업창 내 이미지 스타일 */
+        .popup-img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script>
+        // 3. Leaflet 지도 초기화 (기본 중심 좌표: 서울)
+        const map = L.map('map').setView([37.5665, 126.9780], 13);
+
+        // OpenStreetMap 배경 지도 레이어 추가
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // 4. CSV 파일 읽어오기 (상지 경로 또는 절대 경로 입력)
+        // 블로그 내 data 폴더 안에 places.csv가 있다고 가정합니다.
+        const csvFilePath = './data/places.csv'; 
+
+        fetch(csvFilePath)
+            .then(response => response.text())
+            .then(csvText => {
+                // PapaParse를 이용해 CSV를 JSON으로 변환
+                Papa.parse(csvText, {
+                    header: true,         // CSV의 첫 줄을 key값으로 사용 (컬럼명)
+                    skipEmptyLines: true, // 빈 줄은 건너뜀
+                    complete: function(results) {
+                        const data = results.data;
+                        
+                        // 5. 데이터를 순회하며 지도에 핀(마커) 꽂기
+                        data.forEach(row => {
+                            // CSV 컬럼명에 맞춰 매핑 (컬럼명에 공백이 있다면 정확히 맞춰야 합니다)
+                            const lat = parseFloat(row['위도']);
+                            const lng = parseFloat(row['경도']);
+                            const name = row['장소명'];
+                            const address = row['주소'];
+                            const imgName = row['이미지파일명'];
+
+                            // 위도, 경도 값이 올바른지 확인 후 마커 생성
+                            if (!isNaN(lat) && !isNaN(lng)) {
+                                const marker = L.marker([lat, lng]).addTo(map);
+                                
+                                // 팝업에 들어갈 HTML 구성 (이미지 포함)
+                                // 이미지 파일들이 'images/' 폴더 안에 모여있다고 가정
+                                const popupContent = `
+                                    <div>
+                                        <h3>${name}</h3>
+                                        <p><b>주소:</b> ${address}</p>
+                                        ${imgName ? `<img src="./images/${imgName}" class="popup-img" alt="${name}">` : ''}
+                                    </div>
+                                `;
+                                
+                                marker.bindPopup(popupContent);
+                            }
+                        });
+                    }
+                });
+            })
+            .catch(error => console.error('CSV 파일을 불러오는 중 오류 발생:', error));
+    </script>
+</body>
+</html>
