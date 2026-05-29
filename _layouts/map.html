@@ -70,7 +70,7 @@ layout: null
 
                     if(!isNaN(lat) && !isNaN(lng)) {
 
-                        L.marker([lat, lng]).addTo(map).bindPopup("<b>" + (item.place || "위치") + "</b>");
+                        L.marker([lat, lng]).addTo(map).bindPopup("<b>" + (item.place || item.address) + "</b>");
 
                     }
 
