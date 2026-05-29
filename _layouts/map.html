@@ -39,8 +39,15 @@ layout: null
                         var dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6) + ".";
                         var title = item.place || item.address;
 
-                        var marker = L.marker([lat, lng]).addTo(map);
-                        
+                        //var marker = L.marker([lat, lng]).addTo(map);
+                        var marker = L.circleMarker([lat, lng], {
+    radius: 3,              // 점의 크기 (숫자가 클수록 커집니다)
+    fillColor: "#0078FF",   // 파란색 채우기
+    color: "#ffffff",       // 점의 테두리 색 (흰색)
+    weight: 1,              // 테두리 두께
+    opacity: 1,             // 테두리 투명도
+    fillOpacity: 0.8        // 채우기 투명도
+}).addTo(map);
 marker.bindPopup(
     '<div style="text-align:center; min-width:200px;">' +
     '<div style="font-weight:bold; font-size:12px; color:#666;">' + dateDisplay + '</div>' +
