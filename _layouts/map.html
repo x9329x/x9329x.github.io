@@ -33,47 +33,38 @@ layout: compress
 
     <div id="map"></div>
 
-    <script>
-    // 지도 초기화 (창원시 중심으로 좌표 변경)
-    const map = L.map('map').setView([35.15, 128.60], 12);
+<div id="map" style="width: 100%; height: 600px;"></div>
 
+<script>
+    // 1. 지도 초기화
+    const map = L.map('map').setView([35.15, 128.60], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // 마커 아이콘 설정 (핀이 안 보일 때를 대비한 필수 설정)
-    const DefaultIcon = L.icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41]
-    });
-    L.Marker.prototype.options.icon = DefaultIcon;
-
-    // 데이터 루프
-    {% for row in site.data.places %}
-        // 데이터를 가져와서 강제로 숫자로 변환
-        var lat = parseFloat("{{ row['lat'] }}");
-        var lng = parseFloat("{{ row['lng'] }}");
-        var name = "{{ row['place'] | escape }}";
-        var addr = "{{ row['address'] | escape }}";
-        var img = "{{ row['img'] | escape }}";
-
-        // 콘솔 확인용 (핀이 안 뜨면 F12 눌러서 콘솔에 찍히는 숫자를 확인하세요)
-        console.log("위치:", lat, lng, name);
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-            L.marker([lat, lng]).addTo(map)
-             .bindPopup(`
-                <div style="width: 150px;">
-                    <b>${name}</b><br>${addr}<br>
-                    <img src="{{ site.baseurl }}/assets/images/${img}.png" style="width:100%">
-                </div>
-            `);
-        }
-    {% endfor %}
+    // 2. 외부 JSON 파일 읽어오기
+    // {{ site.baseurl }}를 사용해 파일 경로를 정확히 지정하세요
+    fetch('{{ site.baseurl }}/assets/js/places.json')
+        .then(response => response.json())
+        .then(placeData => {
+            // 데이터가 로드된 후 실행
+            placeData.forEach(item => {
+                L.marker([item.lat, item.lng]).addTo(map)
+                 .bindPopup(`
+                    <div>
+                        <h3>${item.name}</h3>
+                        <p>${item.addr}</p>
+                        <img src="{{ site.baseurl }}/assets/images/${item.img}.png" style="width:100px;">
+                    </div>
+                 `);
+            });
+        })
+        .catch(err => console.error("데이터 로드 실패:", err));
 </script>
-<br>반영되고 있는지</br>
+
+
+
+    
     
 </main>
 
