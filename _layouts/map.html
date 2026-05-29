@@ -9,16 +9,22 @@ layout: null
 </head>
 <body>
 
-<style>
+
+
+    <style>
     #map-wrapper { width: 100%; height: 60%; }
     #map { width: 100%; height: 100%; }
-    /* 마커 이미지 경로가 꼬일 때를 대비해 강제로 설정 */
-    .leaflet-marker-icon { filter: hue-rotate(0deg); } 
+    
+    /* 팝업의 닫기 버튼(x) 숨기기 */
+    .leaflet-popup-close-button { display: none !important; }
+    
+    .popup-content { text-align: center; min-width: 200px; }
+    .popup-img { width: 200px; height: auto; margin: 10px 0; border-radius: 4px; }
+    .popup-date { font-size: 12px; color: #666; }
+    .popup-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
 </style>
 
-<div id="map-wrapper">
-    <div id="map"></div>
-</div>
+<div id="map-wrapper"><div id="map"></div></div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -38,29 +44,26 @@ layout: null
                     var lat = parseFloat(item.lat);
                     var lng = parseFloat(item.lng);
                     
-                    // 이미지가 없으면 날짜를 '정보 없음'으로 처리
-                    var dateDisplay = "날짜 정보 없음";
-                    if (item.img && typeof item.img === 'string' && item.img.length >= 8) {
-                        var dateStr = item.img.substring(0, 8);
-                        dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6) + ".";
-                    }
+                    // 날짜 추출 (YYYYMMDD 형식에서 YYYY.MM 추출)
+                    var dateStr = item.img.substring(0, 8);
+                    var dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6);
+
+                    // 장소명 우선, 없으면 주소 표시
+                    var title = item.place ? item.place : item.address;
 
                     if(!isNaN(lat) && !isNaN(lng)) {
                         L.marker([lat, lng]).addTo(map)
                          .bindPopup(`
-                            <div style="text-align:center; min-width:150px;">
-                                <div style="font-size: 11px; color: #555; margin-bottom:5px;">${dateDisplay}</div>
-                                <b style="font-size: 14px;">${item.place || '이름 없음'}</b><br>
-                                <img src="{{ site.baseurl }}/assets/images/${item.img}" 
-                                     style="width:150px; margin-top:5px; border-radius:4px;"
-                                     onerror="this.style.display='none'; this.nextSibling.innerHTML='이미지를 찾을 수 없습니다.';">
-                                <div></div>
+                            <div class="popup-content">
+                                <div class="popup-date">${dateDisplay}</div>
+                                <div class="popup-title">${title}</div>
+                                <img src="{{ site.baseurl }}/assets/map_img/${item.img}" class="popup-img">
+                                <div style="font-size:12px;">${item.address}</div>
                             </div>
                          `);
                     }
                 });
-            })
-            .catch(err => console.error("데이터 로드 중 에러:", err));
+            });
         
         setTimeout(() => { map.invalidateSize(); }, 500);
     });
