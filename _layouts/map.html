@@ -34,43 +34,45 @@ layout: compress
     <div id="map"></div>
 
     <script>
-        const map = L.map('map').setView([37.5665, 126.9780], 13);
+    // 지도 초기화 (창원시 중심으로 좌표 변경)
+    const map = L.map('map').setView([35.15, 128.60], 12);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-        const markerBounds = [];
+    // 마커 아이콘 설정 (핀이 안 보일 때를 대비한 필수 설정)
+    const DefaultIcon = L.icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41]
+    });
+    L.Marker.prototype.options.icon = DefaultIcon;
 
-        // site.data.places가 이제 첫 줄의 헤더를 Key값으로 인식합니다.
-        {% for row in site.data.places %}
-            // 영문 약자 헤더 매핑
-            var latVal = parseFloat("{{ row.lat }}");
-            var lngVal = parseFloat("{{ row.lng }}");
-            var nameStr = "{{ row.place | escape }}";
-            var addrStr = "{{ row.address | escape }}";
-            var imgStr = "{{ row.img | escape }}";
+    // 데이터 루프
+    {% for row in site.data.places %}
+        // 데이터를 가져와서 강제로 숫자로 변환
+        var lat = parseFloat("{{ row['lat'] }}");
+        var lng = parseFloat("{{ row['lng'] }}");
+        var name = "{{ row['place'] | escape }}";
+        var addr = "{{ row['address'] | escape }}";
+        var img = "{{ row['img'] | escape }}";
 
-            if (!isNaN(latVal) && !isNaN(lngVal)) {
-                var marker = L.marker([latVal, lngVal]).addTo(map);
-                
-                var popupContent = `
-                    <div>
-                        <h3 style="margin: 0 0 5px 0; font-size: 16px;">${nameStr}</h3>
-                        <p style="margin: 0 0 5px 0; font-size: 12px; color: #666;">${addrStr}</p>
-                        ${imgStr ? `<img src="{{ site.baseurl }}/assets/images/${imgStr}" class="popup-img" alt="${nameStr}">` : ''}
-                    </div>
-                `;
-                
-                marker.bindPopup(popupContent);
-                markerBounds.push([latVal, lngVal]);
-            }
-        {% endfor %}
+        // 콘솔 확인용 (핀이 안 뜨면 F12 눌러서 콘솔에 찍히는 숫자를 확인하세요)
+        console.log("위치:", lat, lng, name);
 
-        if (markerBounds.length > 0) {
-            map.fitBounds(markerBounds);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            L.marker([lat, lng]).addTo(map)
+             .bindPopup(`
+                <div style="width: 150px;">
+                    <b>${name}</b><br>${addr}<br>
+                    <img src="{{ site.baseurl }}/assets/images/${img}.png" style="width:100%">
+                </div>
+            `);
         }
-    </script>
+    {% endfor %}
+</script>
 <br>반영되고 있는지</br>
     
 </main>
