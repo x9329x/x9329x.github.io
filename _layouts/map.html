@@ -38,21 +38,23 @@ layout: null
                     var lat = parseFloat(item.lat);
                     var lng = parseFloat(item.lng);
                     
-                    // --- 날짜 정보 추출 로직 시작 ---
-                    // item.img가 '20240127_...' 형태라고 가정
-                    var dateStr = item.img.substring(0, 8); // '20240127'
-                    var year = dateStr.substring(0, 4);     // '2024'
-                    var month = dateStr.substring(4, 6);    // '01'
-                    var dateDisplay = year + "년 " + month + "월";
-                    // --- 날짜 정보 추출 끝 ---
+                    // 이미지가 없으면 날짜를 '정보 없음'으로 처리
+                    var dateDisplay = "날짜 정보 없음";
+                    if (item.img && typeof item.img === 'string' && item.img.length >= 8) {
+                        var dateStr = item.img.substring(0, 8);
+                        dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6) + ".";
+                    }
 
                     if(!isNaN(lat) && !isNaN(lng)) {
                         L.marker([lat, lng]).addTo(map)
                          .bindPopup(`
-                            <div style="text-align:center;">
-                                <div style="font-size: 11px; color: #888;">${dateDisplay}</div>
-                                <b style="font-size: 15px;">${item.place}</b><br>
-                                <img src="{{ site.baseurl }}/assets/images/${item.img}" style="width:150px; margin-top:5px;">
+                            <div style="text-align:center; min-width:150px;">
+                                <div style="font-size: 11px; color: #555; margin-bottom:5px;">${dateDisplay}</div>
+                                <b style="font-size: 14px;">${item.place || '이름 없음'}</b><br>
+                                <img src="{{ site.baseurl }}/assets/images/${item.img}" 
+                                     style="width:150px; margin-top:5px; border-radius:4px;"
+                                     onerror="this.style.display='none'; this.nextSibling.innerHTML='이미지를 찾을 수 없습니다.';">
+                                <div></div>
                             </div>
                          `);
                     }
