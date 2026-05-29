@@ -24,19 +24,13 @@ layout: null
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // 3. 지도가 준비될 때까지 기다렸다가 실행
     window.addEventListener('load', function() {
-        console.log("페이지 로드 완료, 지도 생성 시작");
-        
-        // 지도 객체 생성
         var map = L.map('map').setView([35.15, 128.60], 12);
 
-        // 지도 타일 레이어
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // 4. 데이터 로드 후 핀 꽂기 (이미지/핀 문제 해결을 위해 CDN 주소 직접 지정)
         fetch('{{ site.baseurl }}/assets/places.json')
             .then(res => res.json())
             .then(data => {
@@ -44,11 +38,20 @@ layout: null
                     var lat = parseFloat(item.lat);
                     var lng = parseFloat(item.lng);
                     
+                    // --- 날짜 정보 추출 로직 시작 ---
+                    // item.img가 '20240127_...' 형태라고 가정
+                    var dateStr = item.img.substring(0, 8); // '20240127'
+                    var year = dateStr.substring(0, 4);     // '2024'
+                    var month = dateStr.substring(4, 6);    // '01'
+                    var dateDisplay = year + "년 " + month + "월";
+                    // --- 날짜 정보 추출 끝 ---
+
                     if(!isNaN(lat) && !isNaN(lng)) {
                         L.marker([lat, lng]).addTo(map)
                          .bindPopup(`
                             <div style="text-align:center;">
-                                <b>${item.place}</b><br>
+                                <div style="font-size: 11px; color: #888;">${dateDisplay}</div>
+                                <b style="font-size: 15px;">${item.place}</b><br>
                                 <img src="{{ site.baseurl }}/assets/images/${item.img}" style="width:150px; margin-top:5px;">
                             </div>
                          `);
@@ -57,7 +60,6 @@ layout: null
             })
             .catch(err => console.error("데이터 로드 중 에러:", err));
         
-        // 5. 지도 크기 강제 재계산 (회색 화면 방지)
         setTimeout(() => { map.invalidateSize(); }, 500);
     });
 </script>
