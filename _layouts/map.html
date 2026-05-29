@@ -9,15 +9,10 @@ layout: null
 </head>
 <body>
 
-
-
     <style>
-    #map-wrapper { width: 100%; height: 600px; }
+    #map-wrapper { width: 100%; height: 600px; position: relative; }
     #map { width: 100%; height: 100%; }
-    
-    /* 팝업의 닫기 버튼(x) 숨기기 */
     .leaflet-popup-close-button { display: none !important; }
-    
     .popup-content { text-align: center; min-width: 200px; }
     .popup-img { width: 200px; height: auto; margin: 10px 0; border-radius: 4px; }
     .popup-date { font-size: 12px; color: #666; }
@@ -30,46 +25,41 @@ layout: null
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    window.addEventListener('load', function() {
+    (function() {
         var map = L.map('map').setView([35.15, 128.60], 12);
-
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        fetch('{{ site.baseurl }}/assets/places.json')
-            .then(res => res.json())
-            .then(data => {
-                data.forEach(item => {
+        // Jekyll 변수 노출 방지를 위해 fetch 경로를 상대경로로 명시
+        fetch('/assets/places.json')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                data.forEach(function(item) {
                     var lat = parseFloat(item.lat);
                     var lng = parseFloat(item.lng);
-                    
-                    // 날짜 추출 (YYYYMMDD 형식에서 YYYY.MM 추출)
-                    var dateStr = item.img.substring(0, 8);
+                    var dateStr = String(item.img).substring(0, 8);
                     var dateDisplay = dateStr.substring(0, 4) + "." + dateStr.substring(4, 6);
-
-                    // 장소명 우선, 없으면 주소 표시
                     var title = item.place ? item.place : item.address;
 
                     if(!isNaN(lat) && !isNaN(lng)) {
-                        L.marker([lat, lng]).addTo(map)
-                         .bindPopup(`
-                            <div class="popup-content">
-                                <div class="popup-date">${dateDisplay}</div>
-                                <div class="popup-title">${title}</div>
-                                <img src="{{ site.baseurl }}/assets/map_img/${item.img}" class="popup-img">
-                                <div style="font-size:12px;">${item.address}</div>
-                            </div>
-                         `);
+                        var marker = L.marker([lat, lng]).addTo(map);
+                        marker.bindPopup(
+                            '<div class="popup-content">' +
+                                '<div class="popup-date">' + dateDisplay + '</div>' +
+                                '<div class="popup-title">' + title + '</div>' +
+                                '<img src="/assets/map_img/' + item.img + '" class="popup-img">' +
+                                '<div style="font-size:12px;">' + item.address + '</div>' +
+                            '</div>'
+                        );
                     }
                 });
-            });
+            })
+            .catch(function(err) { console.log("데이터 로드 실패:", err); });
         
-        setTimeout(() => { map.invalidateSize(); }, 500);
-    });
+        setTimeout(function() { map.invalidateSize(); }, 500);
+    })();
 </script>
 
-
-    
 </body>
 </html>
