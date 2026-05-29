@@ -1,46 +1,25 @@
 ---
-layout: compress
+layout: null
 ---
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-    #map {
-        width: 100% !important;
-        height: 600px !important;
-        display: block !important;
-        margin: 20px 0;
-        background: #f0f0f0; /* 지도가 안 뜰 때 확인용 배경색 */
-    }
-</style>
-
-<article>
-    <h1>{{ page.title }}</h1>
-    
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>지도 테스트</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { width: 100vw; height: 100vh; background: #ddd; }
+    </style>
+</head>
+<body>
     <div id="map"></div>
-</article>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-    // 4. 페이지가 로드된 후 지도 초기화
-    window.onload = function() {
-        console.log("지도 초기화 시작...");
-        
-        // 지도 생성
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
         var map = L.map('map').setView([35.15, 128.60], 12);
-
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: 'Map data &copy; OpenStreetMap'
         }).addTo(map);
-
-        // 데이터 불러오기
-        fetch('{{ site.baseurl }}/assets/places.json')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(item => {
-                    L.marker([item.lat, item.lng]).addTo(map)
-                     .bindPopup(`<b>${item.place}</b><br><img src="{{ site.baseurl }}/assets/images/${item.img}" style="width:100px">`);
-                });
-            })
-            .catch(e => console.log("데이터 에러:", e));
-    };
-</script>
+        console.log("지도 생성 완료");
+    </script>
+</body>
+</html>
