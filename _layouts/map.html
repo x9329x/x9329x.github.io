@@ -1,77 +1,46 @@
 ---
 layout: compress
 ---
-{% include head.html %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        width: 100% !important;
+        height: 600px !important;
+        display: block !important;
+        margin: 20px 0;
+        background: #f0f0f0; /* 지도가 안 뜰 때 확인용 배경색 */
+    }
+</style>
 
-<main>
-    {% include header.html %}
-
-    <article>
-        <h1>{{ page.title }}</h1>
-        {{ content }}
-    </article>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <style>
-        #map {
-            width: 100%;
-            height: 600px;
-            margin: 20px 0;
-            border-radius: 8px;
-            z-index: 1;
-        }
-        .popup-img {
-            width: 100%;
-            max-width: 200px;
-            height: auto;
-            display: block;
-            margin-top: 5px;
-        }
-    </style>
-
+<article>
+    <h1>{{ page.title }}</h1>
+    
     <div id="map"></div>
+</article>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // 지도 초기화
-            const map = L.map('map').setView([35.15, 128.60], 12);
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+<script>
+    // 4. 페이지가 로드된 후 지도 초기화
+    window.onload = function() {
+        console.log("지도 초기화 시작...");
+        
+        // 지도 생성
+        var map = L.map('map').setView([35.15, 128.60], 12);
 
-            // 마커 아이콘 설정
-            const DefaultIcon = L.icon({
-                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41]
-            });
-            L.Marker.prototype.options.icon = DefaultIcon;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-// 데이터 파일 읽기 (경로가 assets/places.json으로 변경됨)
+        // 데이터 불러오기
         fetch('{{ site.baseurl }}/assets/places.json')
-            .then(response => {
-                if (!response.ok) throw new Error("JSON 파일을 찾을 수 없습니다.");
-                return response.json();
-            })
-            .then(placeData => {
-                placeData.forEach(item => {
-                    // 데이터의 키(img, lat, lng 등)가 JSON의 헤더와 일치하는지 확인하세요
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(item => {
                     L.marker([item.lat, item.lng]).addTo(map)
-                     .bindPopup(`
-                        <div style="width: 150px;">
-                            <b>${item.place}</b><br>${item.address}<br>
-                            <img src="{{ site.baseurl }}/assets/images/${item.img}" class="popup-img">
-                        </div>
-                     `);
+                     .bindPopup(`<b>${item.place}</b><br><img src="{{ site.baseurl }}/assets/images/${item.img}" style="width:100px">`);
                 });
             })
-            .catch(err => console.warn("지도 데이터 로드 안됨:", err.message));
-        });
-    </script>
-</main>
-
-{% include footer.html %}
+            .catch(e => console.log("데이터 에러:", e));
+    };
+</script>
