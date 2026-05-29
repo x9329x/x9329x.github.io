@@ -57,7 +57,7 @@ layout: null
                                         '<div class="popup-date">' + dateDisplay + '</div>' +
                                         '<div class="popup-title">' + title + '</div>' +
                                         '<img src="{{ site.baseurl }}/assets/map_img/' + item.img + '" class="popup-img" onerror="this.style.display=\'none\'">' +
-                                        //'<div style="font-size:12px;">' + item.address + '</div>' +
+                                        '<div style="font-size:12px;">' + item.address + '</div>' +
                                         '</div>';
 
                         L.marker([lat, lng]).addTo(map).bindPopup(popupHtml);
