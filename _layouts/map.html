@@ -1,10 +1,22 @@
-
 ---
-layout: default
+layout: compress
 ---
 
-<!DOCTYPE html>
-<html lang="ko">
+{% include head.html %}
+
+    <main>
+
+        {% include header.html %}
+
+        <article>
+
+            <h1>{{ page.title }}</h1>
+
+            {{ content }}
+
+        </article>
+
+
 <head>
     <meta charset="UTF-8">
     <title>Leaflet CSV 지도 마커</title>
@@ -30,7 +42,7 @@ layout: default
         }
     </style>
 </head>
-<body>
+
 
     <div id="map"></div>
 
@@ -88,5 +100,10 @@ layout: default
             })
             .catch(error => console.error('CSV 파일을 불러오는 중 오류 발생:', error));
     </script>
+
+    </main>
+
+    {% include footer.html %}
+
 </body>
 </html>
