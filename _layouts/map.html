@@ -12,36 +12,42 @@ layout: null
     </style>
 </head>
 <body>
-<div id="map" style="width: 100%; height: 600px;"></div>
+<div id="map-container" style="width: 100%; height: 600px; border: 1px solid #ccc;">
+    <div id="map" style="width: 100%; height: 100%;"></div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/BR9PV+dSsQSk+q2v5H0k=" crossorigin=""></script>
 
 <script>
+    // 1. 지도 생성
     var map = L.map('map').setView([35.15, 128.60], 12);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // 2. OpenStreetMap 공식 타일 사용 (가장 안정적)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // 3. 데이터 로드
     fetch('{{ site.baseurl }}/assets/places.json')
         .then(response => response.json())
         .then(data => {
-            console.log("불러온 데이터:", data); // 데이터를 제대로 가져왔는지 확인
-
-            data.forEach((item, index) => {
-                // 데이터 키값 확인: JSON 파일의 키와 대소문자까지 똑같아야 합니다.
+            console.log("데이터 성공:", data);
+            data.forEach(item => {
+                // 키값이 JSON과 정확히 일치해야 합니다 (소문자 lat, lng, place, address, img)
                 var lat = parseFloat(item.lat);
                 var lng = parseFloat(item.lng);
                 
-                console.log(`마커 ${index} 생성 시도:`, lat, lng); // 좌표값이 숫자로 나오는지 확인
-
                 if (!isNaN(lat) && !isNaN(lng)) {
                     L.marker([lat, lng]).addTo(map)
-                     .bindPopup(`<b>${item.place}</b>`);
-                } else {
-                    console.error(`마커 ${index} 좌표 오류:`, item);
+                     .bindPopup(`<b>${item.place}</b><br>${item.address}<br><img src="{{ site.baseurl }}/assets/images/${item.img}" style="width:100px">`);
                 }
             });
         })
-        .catch(e => console.error("JSON 로드 실패:", e));
+        .catch(err => console.error("데이터 로드 실패:", err));
+
+    // 4. 지도 크기 재설정 (회색 화면 방지)
+    setTimeout(function() { map.invalidateSize(); }, 500);
 </script>
 </body>
 </html>
