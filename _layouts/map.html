@@ -12,32 +12,36 @@ layout: null
     </style>
 </head>
 <body>
-<div id="map" style="width: 100%; height: 600px; background: #ddd;"></div>
+<div id="map" style="width: 100%; height: 600px;"></div>
 
 <script>
-    // 1. 지도 초기화
     var map = L.map('map').setView([35.15, 128.60], 12);
 
-    // 2. HTTPS 타일 레이어 강제 적용
-    // 기존 주소 대신 더 안전한 HTTPS 주소를 사용합니다.
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // 3. 지도가 회색일 때 발생하는 리사이즈 문제 강제 해결
-    setTimeout(function(){ map.invalidateSize(); }, 500);
-
-    // (데이터 로딩 코드는 그대로 유지)
     fetch('{{ site.baseurl }}/assets/places.json')
-        .then(res => res.json())
+        .then(response => response.json())
         .then(data => {
-            data.forEach(item => {
-                L.marker([item.lat, item.lng]).addTo(map)
-                 .bindPopup(`<b>${item.place}</b>`);
+            console.log("불러온 데이터:", data); // 데이터를 제대로 가져왔는지 확인
+
+            data.forEach((item, index) => {
+                // 데이터 키값 확인: JSON 파일의 키와 대소문자까지 똑같아야 합니다.
+                var lat = parseFloat(item.lat);
+                var lng = parseFloat(item.lng);
+                
+                console.log(`마커 ${index} 생성 시도:`, lat, lng); // 좌표값이 숫자로 나오는지 확인
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    L.marker([lat, lng]).addTo(map)
+                     .bindPopup(`<b>${item.place}</b>`);
+                } else {
+                    console.error(`마커 ${index} 좌표 오류:`, item);
+                }
             });
         })
-        .catch(e => console.log("데이터 로드 실패:", e));
+        .catch(e => console.error("JSON 로드 실패:", e));
 </script>
 </body>
 </html>
