@@ -4,78 +4,74 @@ layout: compress
 
 {% include head.html %}
 
-    <main>
+<main>
 
-        {% include header.html %}
+    {% include header.html %}
 
-        <article>
+    <article>
+        <h1>{{ page.title }}</h1>
+        {{ content }}
+    </article>
 
-            <h1>{{ page.title }}</h1>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-            {{ content }}
-
-        </article>
-
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<style>
-    #map {
-        width: 100%;
-        height: 600px;
-    }
-    .popup-img {
-        width: 100%;
-        max-width: 200px;
-        height: auto;
-        display: block;
-        margin-top: 5px;
-    }
-</style>
-
-<div id="map"></div>
-
-<script>
-    // 2. Leaflet 지도 초기화 (기본 중심 좌표: 서울)
-    const map = L.map('map').setView([37.5665, 126.9780], 13);
-
-    // OpenStreetMap 배경 레이어 추가
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // 3. Jekyll Liquid 문법으로 헤더 없는 CSV 데이터 순회
-    // _data/places.csv 파일 기준이며, 헤더가 없으므로 인덱스 번호로 접근합니다.
-    {% for row in site.data.places %}
-        // 인덱스 매핑: [0]이미지파일명, [1]위도, [2]경도, [3]주소, [4]장소명
-        var lat = parseFloat("{{ row[1] }}");
-        var lng = parseFloat("{{ row[2] }}");
-        var imgName = "{{ row[0] | escape }}";
-        var address = "{{ row[3] | escape }}";
-        var name = "{{ row[4] | escape }}";
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-            // 마커 생성 및 지도 추가
-            var marker = L.marker([lat, lng]).addTo(map);
-            
-            // 팝업 내용 구성 (이미지 포함)
-            // 이미지는 루트의 assets/images/ 폴더 안에 있다고 가정합니다.
-            var popupContent = `
-                <div>
-                    <h3 style="margin: 0 0 5px 0;">${name}</h3>
-                    <p style="margin: 0 0 5px 0; font-size: 12px; color: #666;">${address}</p>
-                    ${imgName ? `<img src="{{ site.baseurl }}/assets/images/${imgName}" class="popup-img" alt="${name}">` : ''}
-                </div>
-            `;
-            
-            marker.bindPopup(popupContent);
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+            z-index: 1;
         }
-    {% endfor %}
-</script>
-    </main>
+        .popup-img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
 
-    {% include footer.html %}
+    <div id="map"></div>
 
-</body>
-</html>
+    <script>
+        const map = L.map('map').setView([37.5665, 126.9780], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const markerBounds = [];
+
+        // site.data.places가 이제 첫 줄의 헤더를 Key값으로 인식합니다.
+        {% for row in site.data.places %}
+            // 영문 약자 헤더 매핑
+            var latVal = parseFloat("{{ row.lat }}");
+            var lngVal = parseFloat("{{ row.lng }}");
+            var nameStr = "{{ row.place | escape }}";
+            var addrStr = "{{ row.address | escape }}";
+            var imgStr = "{{ row.img | escape }}";
+
+            if (!isNaN(latVal) && !isNaN(lngVal)) {
+                var marker = L.marker([latVal, lngVal]).addTo(map);
+                
+                var popupContent = `
+                    <div>
+                        <h3 style="margin: 0 0 5px 0; font-size: 16px;">${nameStr}</h3>
+                        <p style="margin: 0 0 5px 0; font-size: 12px; color: #666;">${addrStr}</p>
+                        ${imgStr ? `<img src="{{ site.baseurl }}/assets/images/${imgStr}" class="popup-img" alt="${nameStr}">` : ''}
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markerBounds.push([latVal, lngVal]);
+            }
+        {% endfor %}
+
+        if (markerBounds.length > 0) {
+            map.fitBounds(markerBounds);
+        }
+    </script>
+
+</main>
+
+{% include footer.html %}
