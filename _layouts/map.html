@@ -51,24 +51,25 @@ layout: compress
             });
             L.Marker.prototype.options.icon = DefaultIcon;
 
-            // 데이터 파일 읽기
-            fetch('{{ site.baseurl }}/assets/js/places.json')
-                .then(response => {
-                    if (!response.ok) throw new Error("JSON 파일을 찾을 수 없습니다.");
-                    return response.json();
-                })
-                .then(placeData => {
-                    placeData.forEach(item => {
-                        L.marker([item.lat, item.lng]).addTo(map)
-                         .bindPopup(`
-                            <div style="width: 150px;">
-                                <b>${item.name}</b><br>${item.addr}<br>
-                                <img src="{{ site.baseurl }}/assets/images/${item.img}.png" class="popup-img">
-                            </div>
-                         `);
-                    });
-                })
-                .catch(err => console.warn("지도 데이터 로드 안됨:", err.message));
+// 데이터 파일 읽기 (경로가 assets/places.json으로 변경됨)
+        fetch('{{ site.baseurl }}/assets/places.json')
+            .then(response => {
+                if (!response.ok) throw new Error("JSON 파일을 찾을 수 없습니다.");
+                return response.json();
+            })
+            .then(placeData => {
+                placeData.forEach(item => {
+                    // 데이터의 키(img, lat, lng 등)가 JSON의 헤더와 일치하는지 확인하세요
+                    L.marker([item.lat, item.lng]).addTo(map)
+                     .bindPopup(`
+                        <div style="width: 150px;">
+                            <b>${item.place}</b><br>${item.address}<br>
+                            <img src="{{ site.baseurl }}/assets/images/${item.img}" class="popup-img">
+                        </div>
+                     `);
+                });
+            })
+            .catch(err => console.warn("지도 데이터 로드 안됨:", err.message));
         });
     </script>
 </main>
