@@ -12,14 +12,32 @@ layout: null
     </style>
 </head>
 <body>
-    <div id="map"></div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        var map = L.map('map').setView([35.15, 128.60], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; OpenStreetMap'
-        }).addTo(map);
-        console.log("지도 생성 완료");
-    </script>
+<div id="map" style="width: 100%; height: 600px; background: #ddd;"></div>
+
+<script>
+    // 1. 지도 초기화
+    var map = L.map('map').setView([35.15, 128.60], 12);
+
+    // 2. HTTPS 타일 레이어 강제 적용
+    // 기존 주소 대신 더 안전한 HTTPS 주소를 사용합니다.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // 3. 지도가 회색일 때 발생하는 리사이즈 문제 강제 해결
+    setTimeout(function(){ map.invalidateSize(); }, 500);
+
+    // (데이터 로딩 코드는 그대로 유지)
+    fetch('{{ site.baseurl }}/assets/places.json')
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(item => {
+                L.marker([item.lat, item.lng]).addTo(map)
+                 .bindPopup(`<b>${item.place}</b>`);
+            });
+        })
+        .catch(e => console.log("데이터 로드 실패:", e));
+</script>
 </body>
 </html>
